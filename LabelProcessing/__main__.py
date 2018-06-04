@@ -79,18 +79,19 @@ def show_image(image_dir, label_dir):
             img_bbox_center = LabeledImage.draw_bbox_center(img_bbox_center, a['bbox_center'])
             img_bbox_lefttop = LabeledImage.draw_bbox_lefttop(img_bbox_lefttop, a['bbox_lefttop'])
         
-        _, axes = plt.subplots(1, 4, figsize=(21, 5))
-        axes[0].set_title('bbox_center')
-        axes[1].set_title('bbox_angle')
-        axes[2].set_title('parallelogram')
-        axes[3].set_title('segmentation')
-        axes[0].imshow(img_bbox_center)
-        axes[1].imshow(img_bbox_angle)
-        axes[2].imshow(img_parallelogram)
-        axes[3].imshow(img_seg)
+        _, axes = plt.subplots(2, 2, figsize=(21, 10))
+        axes[0][0].set_title('bbox_center')
+        axes[0][1].set_title('bbox_angle')
+        axes[1][0].set_title('parallelogram')
+        axes[1][1].set_title('segmentation')
+        axes[0][1].imshow(img_bbox_center)
+        axes[0][1].imshow(img_bbox_angle)
+        axes[1][0].imshow(img_parallelogram)
+        axes[1][1].imshow(img_seg)
         for ax in axes:
-            #ax.set_aspect('auto')
-            pass
+            for a in ax:
+                #a.set_aspect('auto')
+                pass
         plt.show()
 
 def label_transmit(label_dir):
@@ -116,11 +117,11 @@ def label_transmit(label_dir):
                         bbox_angle = TransmitLabel.seg2bbox_angle(seg)
                         label['annotation'][i]['segmentation'] = seg
                         label['annotation'][i]['bbox_center'] = bbox_center
-                        label['annotation'][i]['bbox_lefttop'] = bbox_lefttop
+                        label['annotation'][i]['bbox'] = bbox_lefttop
                         label['annotation'][i]['bbox_angle'] = bbox_angle
                         label['annotation'][i]['parallelogram'] = parallelogram
                         label['annotation'][i]['parallelogram_point'] = parallelogram_point
-                        label['annotation'][i].pop('bbox', None)
+                        #label['annotation'][i].pop('bbox', None)
                     with open(new_n_path, 'w') as f:
                         json.dump(label, f)
                 except Exception as e:
