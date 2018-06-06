@@ -165,6 +165,8 @@ def resize(image_dir, label_dir):
                 for i in range(len(label['annotation'])):
                     label['annotation'][i]['bbox'] = \
                     TransmitLabel.resize2short(label['annotation'][i]['bbox'], origin, 800)
+                label['image']['height'] = image.shape[0]
+                label['image']['width'] = image.shape[1]
                 #save image, label
                 with open(new_l_path, 'w') as f:
                         json.dump(label, f)
