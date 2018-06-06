@@ -169,7 +169,47 @@ def resize(image_dir, label_dir):
                         json.dump(label, f)
                 cv.imwrite(new_i_path, image)
             except Exception as e:
-                print(f'Error: Can\'t resize {i}')             
+                print(f'Error: Can\'t resize {i}')     
+
+def expand(image_dir, label_dir):
+    print(f'Start to Expand Label')
+    expand_dir = join(join(label_dir, '..'), 'expand')
+    expand_label_dir = join(expand_dir, 'label')
+    if not isdir(expand_dir):
+        mkdir(expand_dir)
+        if not isdir(expand_label_dir):
+            mkdir(expand_label_dir)
+    for m in tqdm.tqdm(listdir(image_dir)):
+        #parse i check if it is '.jpg'
+        i_sub = m.split('.')
+        if len(i_sub) == 2 and i_sub[-1] == 'jpg':
+            i_path = join(image_dir, m)
+            l_path = join(label_dir, f'{i_sub[0]}.json')
+            new_l_path = join(expand_label_dir, f'{i_sub[0]}.json')
+            if not isfile(l_path):
+                break
+            #load label and image
+            try:
+                with open(l_path, 'r') as f:
+                    label = json.load(f)
+                image = cv.imread(i_path)
+                #calculate scale
+                origin = image.shape
+                #resize image, label
+                new_annotation = []
+                for i in range(len(label['annotation'])):
+                    seg = TransmitLabel.seg2seg_expand(label['annotation'][i]['bbox'], origin, 30.0, 40.0)
+                    if not seg:
+                        pass
+                    else:
+                        label['annotation'][i]['bbox'] = seg
+                        new_annotation.append(label['annotation'][i])
+                label['annotation'] = new_annotation
+                #save image, label
+                with open(new_l_path, 'w') as f:
+                        json.dump(label, f)
+            except Exception as e:
+                print(f'Error: Can\'t expand {m} : {e}')
 
 def main():
     options, args = args_parser()
@@ -189,6 +229,9 @@ def main():
     if mode == 'resize':
         if image_dir is not None and label_dir is not None:
             resize(image_dir, label_dir)
+    if mode == 'expand':
+        if image_dir is not None and label_dir is not None:
+            expand(image_dir, label_dir)
 
 if __name__=='__main__':
     main()

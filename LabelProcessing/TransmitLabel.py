@@ -218,16 +218,16 @@ def seg2seg_expand(seg, origin, r_e, l_e):
         print(f'Error: input segmentation must be 4 points.')
         return False
     #calculate x's width of segmentation
-    lb = seg[0][0]
-    lt = seg[1][0]
-    rt = seg[2][0]
-    rb = seg[3][0]
-    w = ((rb - lb) + (rt - lt))/ 2
-    lb = seg[0][0] - w * l_e
-    lt = seg[1][0] - w * l_e
-    rt = seg[2][0] + w * r_e
-    rb = seg[3][0] + w * r_e
-    if lb<0 or lt<0 or rt>origin[1] or rb>origin[1]:
+    lb = (seg[0][0], seg[0][1])
+    lt = (seg[1][0], seg[1][1])
+    rt = (seg[2][0], seg[2][1])
+    rb = (seg[3][0], seg[3][1])
+    w = ((rb[0] - lb[0]) + (rt[0] - lt[0]))/ 2
+    lb = (seg[0][0] - w * (l_e/100), lb[1])
+    lt = (seg[1][0] - w * (l_e/100), lt[1])
+    rt = (seg[2][0] + w * (r_e/100), rt[1])
+    rb = (seg[3][0] + w * (r_e/100), rb[1])
+    if lb[0]<0 or lt[0]<0 or rt[0]>origin[1] or rb[0]>origin[1]:
         return False
     return [lb, lt, rt, rb]
 
