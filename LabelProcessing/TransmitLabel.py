@@ -205,11 +205,47 @@ def seg2bbox_angle(seg):
     h = ((bbox_lb[0] - bbox_lt[0])**2 + (bbox_lb[1] - bbox_lt[1])**2)**0.5
     return [bbox_mid[0], bbox_mid[1], w, h, angle]
 
-def seg2seg_expand(seg, r_e, l_e):
+def seg2seg_expand(seg, origin, r_e, l_e):
+    # expand label area
+    # input:
+    #   seg: [[x1, y1], [x2, y2], [x3, y3], [x4, y4]]
+    #   origin: (h, w)
+    #   r_e: percentage of right side expand
+    #   l_e: percentage of left side expand
+    # return:
+    #   seg: [[x1, y1], [x2, y2], [x3, y3], [x4, y4]] or False
     if len(seg) is not 4:
+        print(f'Error: input segmentation must be 4 points.')
         return False
-    lb = seg[0][0] - r_e
-    lt = seg[1][0] - r_e
-    rt = seg[2][0] + l_e
-    rb = seg[3][0] + l_e
+    #calculate x's width of segmentation
+    lb = seg[0][0]
+    lt = seg[1][0]
+    rt = seg[2][0]
+    rb = seg[3][0]
+    w = ((rb - lb) + (rt - lt))/ 2
+    lb = seg[0][0] - w * l_e
+    lt = seg[1][0] - w * l_e
+    rt = seg[2][0] + w * r_e
+    rb = seg[3][0] + w * r_e
+    if lb<0 or lt<0 or rt>origin[1] or rb>origin[1]:
+        return False
     return [lb, lt, rt, rb]
+
+def resize2short(seg, origin, short):
+    # resize label
+    # input: 
+    #   seg: [[x1, y1], [x2, y2], [x3, y3], [x4, y4]]
+    #   origin: (h, w)
+    #   short: int
+    # return:
+    #   seg: [[x1, y1], [x2, y2], [x3, y3], [x4, y4]]
+    
+    #choose short side and calculate scale
+    if origin[0] >= origin[1]:
+        scale = short / origin[1]
+    else:
+        scale = short / origin[0]
+    seg_resized = []
+    for s in seg:
+        seg_resized.append([s[0]*scale, s[1]*scale])
+    return seg_resized

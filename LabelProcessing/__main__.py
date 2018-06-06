@@ -77,14 +77,14 @@ def show_image(image_dir, label_dir):
             img_parallelogram_p = LabeledImage.draw_parallelogram_p(img_parallelogram_p, a['parallelogram_point'])
             img_bbox_angle = LabeledImage.draw_bbox_angle(img_bbox_angle, a['bbox_angle'])
             img_bbox_center = LabeledImage.draw_bbox_center(img_bbox_center, a['bbox_center'])
-            img_bbox_lefttop = LabeledImage.draw_bbox_lefttop(img_bbox_lefttop, a['bbox_lefttop'])
+            img_bbox_lefttop = LabeledImage.draw_bbox_lefttop(img_bbox_lefttop, a['bbox'])
         
         _, axes = plt.subplots(2, 2, figsize=(21, 10))
         axes[0][0].set_title('bbox_center')
         axes[0][1].set_title('bbox_angle')
         axes[1][0].set_title('parallelogram')
         axes[1][1].set_title('segmentation')
-        axes[0][1].imshow(img_bbox_center)
+        axes[0][0].imshow(img_bbox_center)
         axes[0][1].imshow(img_bbox_angle)
         axes[1][0].imshow(img_parallelogram)
         axes[1][1].imshow(img_seg)
@@ -127,6 +127,50 @@ def label_transmit(label_dir):
                 except Exception as e:
                     print(f'Error: {n_path}')
 
+def resize(image_dir, label_dir):
+    print(f'Start to Resize Image and Label')
+    resized_dir = join(join(label_dir, '..'), 'resized')
+    resized_img_dir = join(resized_dir, 'image')
+    resized_label_dir = join(resized_dir, 'label')
+    if not isdir(resized_dir):
+        mkdir(resized_dir)
+        if not isdir(resized_img_dir):
+            mkdir(resized_img_dir)
+        if not isdir(resized_label_dir):
+            mkdir(resized_label_dir)
+    for i in tqdm.tqdm(listdir(image_dir)):
+        #parse i check if it is '.jpg'
+        i_sub = i.split('.')
+        if len(i_sub) == 2 and i_sub[-1] == 'jpg':
+            i_path = join(image_dir, i)
+            l_path = join(label_dir, f'{i_sub[0]}.json')
+            new_i_path = join(resized_img_dir, i)
+            new_l_path = join(resized_label_dir, f'{i_sub[0]}.json')
+            if not isfile(l_path):
+                break
+            #load label and image
+            try:
+                with open(l_path, 'r') as f:
+                    label = json.load(f)
+                image = cv.imread(i_path)
+                #calculate scale
+                origin = image.shape
+                if origin[0] >= origin[1]:
+                    scale = 800 / origin[1]
+                else:
+                    scale = 800 / origin[0]
+                #resize image, label
+                image = cv.resize(image, (0,0), fx=scale, fy=scale)
+                for i in range(len(label['annotation'])):
+                    label['annotation'][i]['bbox'] = \
+                    TransmitLabel.resize2short(label['annotation'][i]['bbox'], origin, 800)
+                #save image, label
+                with open(new_l_path, 'w') as f:
+                        json.dump(label, f)
+                cv.imwrite(new_i_path, image)
+            except Exception as e:
+                print(f'Error: Can\'t resize {i}')             
+
 def main():
     options, args = args_parser()
     mode = options.mode
@@ -139,9 +183,12 @@ def main():
     if mode == 'show':
         if image_dir is not None and label_dir is not None:
             show_image(image_dir, label_dir)
-    if mode == 'transmit':
+    if mode == 'transmit': #this must be done at the end
         if label_dir is not None:
             label_transmit(label_dir)
+    if mode == 'resize':
+        if image_dir is not None and label_dir is not None:
+            resize(image_dir, label_dir)
 
 if __name__=='__main__':
     main()
