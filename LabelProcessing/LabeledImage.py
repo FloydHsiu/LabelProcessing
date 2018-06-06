@@ -12,7 +12,7 @@ def draw_bbox_center(img, bbox):
     h_w, h_h = int(0.5*width), int(0.5*height)
     lt = (x - h_w, y - h_h)
     rb = (x + h_w, y + h_h)
-    cv.rectangle(img, lt, rb, (0, 255, 0), 5)
+    cv.rectangle(img, lt, rb, (0, 255, 0), 2)
     return img
 
 def draw_bbox_lefttop(img, bbox):
@@ -21,7 +21,7 @@ def draw_bbox_lefttop(img, bbox):
     width, height = int(bbox[2]), int(bbox[3])
     lt = (x, y)
     rb = (x+width, y+height)
-    cv.rectangle(img, lt, rb, (0, 255, 0), 5)
+    cv.rectangle(img, lt, rb, (0, 255, 0), 2)
     return img
 
 def draw_bbox_angle(img, bbox):
@@ -44,10 +44,10 @@ def draw_bbox_angle(img, bbox):
     lb = (int(lb[0]), int(lb[1]))
     rb = (int(rb[0]), int(rb[1]))
     img = np.copy(img)
-    cv.line(img, lb, lt, (0, 255, 0), 5)
-    cv.line(img, lt, rt, (0, 255, 0), 5)
-    cv.line(img, rt, rb, (0, 255, 0), 5)
-    cv.line(img, rb, lb, (0, 255, 0), 5)
+    cv.line(img, lb, lt, (0, 255, 0), 2)
+    cv.line(img, lt, rt, (0, 255, 0), 2)
+    cv.line(img, rt, rb, (0, 255, 0), 2)
+    cv.line(img, rb, lb, (0, 255, 0), 2)
     return img
 
 def draw_seg(img, seg):
@@ -56,10 +56,10 @@ def draw_seg(img, seg):
     rt = (int(seg[2][0]), int(seg[2][1]))
     rb = (int(seg[3][0]), int(seg[3][1]))
     img = np.copy(img)
-    cv.line(img, lb, lt, (0, 255, 0), 5)
-    cv.line(img, lt, rt, (0, 255, 0), 5)
-    cv.line(img, rt, rb, (0, 255, 0), 5)
-    cv.line(img, rb, lb, (0, 255, 0), 5)
+    cv.line(img, lb, lt, (0, 255, 0), 2)
+    cv.line(img, lt, rt, (0, 255, 0), 2)
+    cv.line(img, rt, rb, (0, 255, 0), 2)
+    cv.line(img, rb, lb, (0, 255, 0), 2)
     return img
 
 def draw_parallelogram(img, parallelogram):
@@ -73,10 +73,10 @@ def draw_parallelogram(img, parallelogram):
     lb = (int((lb_y-b_left)/slope) ,int(lb_y))
     rb = (int(lb[0]+width), lb[1])
     img = np.copy(img)
-    cv.line(img, lb, lt, (0, 255, 0), 5)
-    cv.line(img, lt, rt, (0, 255, 0), 5)
-    cv.line(img, rt, rb, (0, 255, 0), 5)
-    cv.line(img, rb, lb, (0, 255, 0), 5)
+    cv.line(img, lb, lt, (0, 255, 0), 2)
+    cv.line(img, lt, rt, (0, 255, 0), 2)
+    cv.line(img, rt, rb, (0, 255, 0), 2)
+    cv.line(img, rb, lb, (0, 255, 0), 2)
     return img
 
 def draw_parallelogram_p(img, parallelogram_p):
@@ -85,10 +85,10 @@ def draw_parallelogram_p(img, parallelogram_p):
     rt = (int(parallelogram_p[2][0]), int(parallelogram_p[2][1]))
     rb = (int(parallelogram_p[3][0]), int(parallelogram_p[3][1]))
     img = np.copy(img)
-    cv.line(img, lb, lt, (0, 255, 0), 5)
-    cv.line(img, lt, rt, (0, 255, 0), 5)
-    cv.line(img, rt, rb, (0, 255, 0), 5)
-    cv.line(img, rb, lb, (0, 255, 0), 5)
+    cv.line(img, lb, lt, (0, 255, 0), 2)
+    cv.line(img, lt, rt, (0, 255, 0), 2)
+    cv.line(img, rt, rb, (0, 255, 0), 2)
+    cv.line(img, rb, lb, (0, 255, 0), 2)
     return img
 
 def tuple_int(point):

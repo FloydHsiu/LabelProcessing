@@ -14,6 +14,7 @@ def args_parser():
     parser.add_option('-l', '--label', dest='label_dir', help='write report to LABEL_DIR', metavar='LABEL_DIR')
     parser.add_option('-i', '--image', dest='image_dir', help='wirte report to IMAGE_DIR', metavar='IMAGE_DIR')
     parser.add_option('-s', '--stride', dest='stride', help='write report to STRIDE', metavar='STRIDE')
+    parser.add_option('-n', '--number', dest='num', help='write report to NUM', metavar='NUM')
     (options, args) = parser.parse_args()
     return options, args
 
@@ -169,7 +170,36 @@ def resize(image_dir, label_dir):
                         json.dump(label, f)
                 cv.imwrite(new_i_path, image)
             except Exception as e:
-                print(f'Error: Can\'t resize {i}')     
+                print(f'Error: Can\'t resize {i}')
+
+def labeled_image(image_dir, label_dir, num):
+    print(f'Start to Save Labeled Image')
+    labeledimage_dir = join(join(image_dir, '..'), 'labeled_image')
+    if not isdir(labeledimage_dir):
+        mkdir(labeledimage_dir)
+    ls = listdir(image_dir)
+    try:
+        num = int(num)
+    except Exception as e:
+        num = len(ls)
+    for i in tqdm.tqdm(range(num)):
+        m = ls[i]
+        #parse i check if it is '.jpg'
+        i_sub = m.split('.')
+        if len(i_sub) == 2 and i_sub[-1] == 'jpg':
+            i_path = join(image_dir, m)
+            l_path = join(label_dir, f'{i_sub[0]}.json')
+            new_i_path = join(labeledimage_dir, f'{i_sub[0]}.jpg')
+            if not isfile(l_path):
+                break
+            with open(l_path, 'r') as f:
+                label = json.load(f)
+            image = cv.imread(i_path, cv.IMREAD_GRAYSCALE)
+            img = cv.cvtColor(image, cv.COLOR_GRAY2RGB)
+            img_seg = np.copy(img)
+            for a in label['annotation']:
+                img_seg = LabeledImage.draw_seg(img_seg, a['segmentation'])
+            cv.imwrite(new_i_path, img_seg)   
 
 def expand(image_dir, label_dir):
     print(f'Start to Expand Label')
@@ -217,6 +247,7 @@ def main():
     image_dir = options.image_dir
     label_dir = options.label_dir
     stride = options.stride
+    num = options.num
     if mode == 'clip':
         if image_dir is not None and label_dir is not None:
             clip_image(image_dir, label_dir, stride)
@@ -232,6 +263,9 @@ def main():
     if mode == 'expand':
         if image_dir is not None and label_dir is not None:
             expand(image_dir, label_dir)
+    if mode == 'labeledimage':
+        if image_dir is not None and label_dir is not None:
+            labeled_image(image_dir, label_dir, num)
 
 if __name__=='__main__':
     main()
