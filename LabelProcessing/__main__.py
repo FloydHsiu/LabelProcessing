@@ -244,6 +244,7 @@ def expand(image_dir, label_dir):
                 print(f'Error: Can\'t expand {m} : {e}')
 
 def collect_labels(label_dir):
+    print('Start to collect labels into one file')
     collected_path = join(join(label_dir, '..'), 'labels.json')
     if not isdir(label_dir):
         print(f'Error: {label_dir} is not directory')
@@ -275,6 +276,9 @@ def collect_labels(label_dir):
         except Exception as e:
             print(f'Error: {e} \n {label_path}')
     collected_label['categories'].append({'id':1, 'name':'Flank', 'supercategory':'Endmill'})
+    print(f'Totally collect: ')
+    print(f"Images: {len(collected_label['images'])}")
+    print(f"Annotations: {len(collected_label['annotations'])}")
     with open(collected_path, 'w') as f:
         json.dump(collected_label, f)           
 
