@@ -249,3 +249,13 @@ def resize2short(seg, origin, short):
     for s in seg:
         seg_resized.append([s[0]*scale, s[1]*scale])
     return seg_resized
+
+def seg2area(seg):
+    # calculate polygen area
+    # https://www.mathopenref.com/coordpolygonarea.html
+    if len(seg) > 2:
+        result = 0
+        for i in range(0, len(seg)):
+            result = result + (seg[i-1][0] * seg[i][1] - seg[i-1][1] * seg[i][0])
+        return np.abs(result/2)
+    return 0
