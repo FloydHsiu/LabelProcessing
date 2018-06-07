@@ -243,6 +243,41 @@ def expand(image_dir, label_dir):
             except Exception as e:
                 print(f'Error: Can\'t expand {m} : {e}')
 
+def collect_labels(label_dir):
+    collected_path = join(join(label_dir, '..'), 'labels.json')
+    if not isdir(label_dir):
+        print(f'Error: {label_dir} is not directory')
+        return
+    collected_label = {}
+    collected_label['images'] = []
+    collected_label['annotations'] = []
+    collected_label['categories'] = []
+    image_id = 0
+    annotation_id = 0
+    for l in tqdm.tqdm(listdir(label_dir)):
+        label_path = join(label_dir, l)
+        try:
+            with open(label_path, 'r') as f:
+                label = json.load(f)
+            image = label['image']
+            image['id'] = image_id
+            annotation = label['annotation']
+            for i in range(len(annotation)):
+                annotation[i]['id'] = annotation_id
+                annotation[i]['category_id'] = 1
+                annotation[i]['image_id'] = image_id
+                annotation[i]['area'] = TransmitLabel.seg2area(annotation[i]['segmentation'])
+                annotation[i]['iscrowd'] = 1
+                annotation_id = annotation_id + 1
+            collected_label['images'].append(image)
+            collected_label['annotations'].extend(annotation)
+            image_id = image_id + 1
+        except Exception as e:
+            print(f'Error: {e} \n {label_path}')
+    collected_label['categories'].append({'id':1, 'name':'Flank', 'supercategory':'Endmill'})
+    with open(collected_path, 'w') as f:
+        json.dump(collected_label, f)           
+
 def main():
     options, args = args_parser()
     mode = options.mode
@@ -268,6 +303,9 @@ def main():
     if mode == 'labeledimage':
         if image_dir is not None and label_dir is not None:
             labeled_image(image_dir, label_dir, num)
+    if mode == 'collectlabel':
+        if label_dir is not None:
+            collect_labels(label_dir)
 
 if __name__=='__main__':
     main()
