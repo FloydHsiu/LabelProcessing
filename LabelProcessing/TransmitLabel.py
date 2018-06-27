@@ -5,9 +5,10 @@ import sys
 import tqdm
 import numpy as np
 
+
 def seg2bbox_lefttop(seg):
     # transmit a segmentation label into bounding box label
-    # input: 
+    # input:
     #    seg: list([xi, yi])
     # output:
     #    bbox_lefttop: [x, y, w, h]
@@ -33,9 +34,10 @@ def seg2bbox_lefttop(seg):
             pass
     return [x_left, y_top, x_right - x_left, y_bottom - y_top]
 
+
 def seg2bbox_center(seg):
     # transmit a segmentation label into bounding box label
-    # input: 
+    # input:
     #    seg: list([xi, yi])
     # output:
     #    bbox_center: [x, y, w, h]
@@ -63,6 +65,7 @@ def seg2bbox_center(seg):
         height = y_bottom - y_top
     return [x_left + width/2, y_top + height/2, width, height]
 
+
 def seg2parallelogram(seg):
     # assume the segmentation is as the type below
     #    ----------
@@ -76,11 +79,11 @@ def seg2parallelogram(seg):
     #   parallelogram: [x, y, w, h, angle]
     if len(seg) is not 4:
         return False
-    #calculate left-right slope
+    # calculate left-right slope
     angle_left = np.arctan2(seg[0][1] - seg[1][1], seg[0][0] - seg[1][0])
     angle_right = np.arctan2(seg[3][1] - seg[2][1], seg[3][0] - seg[2][0])
     slope = np.tan((angle_left + angle_right)/2)
-    #avoid degree(90) --> if deg > 89.99: call seg2bbox and append(90)
+    # avoid degree(90) --> if deg > 89.99: call seg2bbox and append(90)
     if np.abs(slope) > 5730.0:
         bbox = seg2bbox_center(seg)
         return bbox.append(90)
@@ -115,6 +118,7 @@ def seg2parallelogram(seg):
     angle = (angle_left + angle_right)/2
     return [p_lt[0], p_lt[1], w, h, angle]
 
+
 def seg2parallelogram_point(seg):
     # assume the parallelogram is as the type below
     #    ----------
@@ -128,11 +132,11 @@ def seg2parallelogram_point(seg):
     #   parallelogram_point: [[x1, y1], [x2, y2], [x3, y3], [x4, y4]]]
     if len(seg) is not 4:
         return False
-    #calculate left-right slope
+    # calculate left-right slope
     angle_left = np.arctan2(seg[0][1] - seg[1][1], seg[0][0] - seg[1][0])
     angle_right = np.arctan2(seg[3][1] - seg[2][1], seg[3][0] - seg[2][0])
     slope = np.tan((angle_left + angle_right)/2)
-    #avoid degree(90) --> if deg > 89.99: call seg2bbox and append(90)
+    # avoid degree(90) --> if deg > 89.99: call seg2bbox and append(90)
     if np.abs(slope) > 5730.0:
         bbox = seg2bbox_center(seg)
         return bbox.append(90)
@@ -166,6 +170,7 @@ def seg2parallelogram_point(seg):
     p_rt = [(y_top - b_right)/slope, y_top]
     return [p_lb, p_lt, p_rt, p_rb]
 
+
 def seg2bbox_angle(seg):
     # assume the parallelogram is as the type below
     #    ----------
@@ -187,13 +192,13 @@ def seg2bbox_angle(seg):
     b_left = lt[1] - a_left*lt[0]
     rt = (lt[0]+width, lt[1])
     b_right = rt[1] - a_right*(rt[0])
-    #cal left_bottom
+    # cal left_bottom
     lb_y = lt[1] + height
-    lb = ((lb_y -b_left)/a_left, lb_y)
-    #cal b_top, b_bottom
+    lb = ((lb_y - b_left)/a_left, lb_y)
+    # cal b_top, b_bottom
     b_top = lt[1] - a_top*lt[0]
     b_bottom = lb[1] - a_bottom*lb[0]
-    #cal bbox_angle 4 point
+    # cal bbox_angle 4 point
     bbox_lt = lt
     bbox_lb = lb
     bbox_rt_x = -1*(b_top - b_right) / (a_top - a_right)
@@ -204,6 +209,7 @@ def seg2bbox_angle(seg):
     w = ((bbox_lb[0] - bbox_rb[0])**2 + (bbox_lb[1] - bbox_rb[1])**2)**0.5
     h = ((bbox_lb[0] - bbox_lt[0])**2 + (bbox_lb[1] - bbox_lt[1])**2)**0.5
     return [bbox_mid[0], bbox_mid[1], w, h, angle]
+
 
 def seg2seg_expand(seg, origin, r_e, l_e):
     # expand label area
@@ -217,30 +223,31 @@ def seg2seg_expand(seg, origin, r_e, l_e):
     if len(seg) is not 4:
         print(f'Error: input segmentation must be 4 points.')
         return False
-    #calculate x's width of segmentation
+    # calculate x's width of segmentation
     lb = (seg[0][0], seg[0][1])
     lt = (seg[1][0], seg[1][1])
     rt = (seg[2][0], seg[2][1])
     rb = (seg[3][0], seg[3][1])
-    w = ((rb[0] - lb[0]) + (rt[0] - lt[0]))/ 2
+    w = ((rb[0] - lb[0]) + (rt[0] - lt[0])) / 2
     lb = (seg[0][0] - w * (l_e/100), lb[1])
     lt = (seg[1][0] - w * (l_e/100), lt[1])
     rt = (seg[2][0] + w * (r_e/100), rt[1])
     rb = (seg[3][0] + w * (r_e/100), rb[1])
-    if lb[0]<0 or lt[0]<0 or rt[0]>origin[1] or rb[0]>origin[1]:
+    if lb[0] < 0 or lt[0] < 0 or rt[0] > origin[1] or rb[0] > origin[1]:
         return False
     return [lb, lt, rt, rb]
 
+
 def resize2short(seg, origin, short):
     # resize label
-    # input: 
+    # input:
     #   seg: [[x1, y1], [x2, y2], [x3, y3], [x4, y4]]
     #   origin: (h, w)
     #   short: int
     # return:
     #   seg: [[x1, y1], [x2, y2], [x3, y3], [x4, y4]]
-    
-    #choose short side and calculate scale
+
+    # choose short side and calculate scale
     if origin[0] >= origin[1]:
         scale = short / origin[1]
     else:
@@ -250,12 +257,14 @@ def resize2short(seg, origin, short):
         seg_resized.append([s[0]*scale, s[1]*scale])
     return seg_resized
 
+
 def seg2area(seg):
     # calculate polygen area
     # https://www.mathopenref.com/coordpolygonarea.html
     if len(seg) > 2:
         result = 0
         for i in range(0, len(seg)):
-            result = result + (seg[i-1][0] * seg[i][1] - seg[i-1][1] * seg[i][0])
+            result = result + (seg[i-1][0] * seg[i]
+                               [1] - seg[i-1][1] * seg[i][0])
         return np.abs(result/2)
     return 0

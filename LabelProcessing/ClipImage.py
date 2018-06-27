@@ -7,6 +7,7 @@ from os import listdir, mkdir
 import json
 import tqdm
 
+
 def clip_shiftx(src_image, annotations, stitch_size, clip_size, stride=2):
     # Input:
     #   src_image : np_2d_array(height, width)
@@ -19,17 +20,17 @@ def clip_shiftx(src_image, annotations, stitch_size, clip_size, stride=2):
     #   clip_annotations_list : list(list([x,y], [x,y],....))
     clip_width = clip_size * src_image.shape[1] / stitch_size
     stride_width = stride * src_image.shape[1] / stitch_size
-    clip_nums =  int(np.floor((stitch_size - clip_size) / stride))
+    clip_nums = int(np.floor((stitch_size - clip_size) / stride))
     clip_images = []
     clip_annotations_list = []
-    
+
     for i in range(0, clip_nums):
-        #clip image
+        # clip image
         clip_start = int(i * stride_width)
         clip_end = int(clip_width + clip_start)
         clip_image = src_image[:, clip_start: clip_end]
         clip_annotations = []
-        #clip bbox
+        # clip bbox
         for a in annotations:
             a = a.copy()
             isAllClear = True
@@ -48,6 +49,7 @@ def clip_shiftx(src_image, annotations, stitch_size, clip_size, stride=2):
         clip_images.append(clip_image)
         clip_annotations_list.append(clip_annotations)
     return clip_images, clip_annotations_list
+
 
 def load_images_and_labels(image_dir, label_dir):
     # Input:

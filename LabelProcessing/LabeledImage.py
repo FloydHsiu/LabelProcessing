@@ -5,6 +5,7 @@ import sys
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 def draw_bbox_center(img, bbox):
     img = np.copy(img)
     x, y = int(bbox[0]), int(bbox[1])
@@ -15,6 +16,7 @@ def draw_bbox_center(img, bbox):
     cv.rectangle(img, lt, rb, (0, 255, 0), 2)
     return img
 
+
 def draw_bbox_lefttop(img, bbox):
     img = np.copy(img)
     x, y = int(bbox[0]), int(bbox[1])
@@ -23,6 +25,7 @@ def draw_bbox_lefttop(img, bbox):
     rb = (x+width, y+height)
     cv.rectangle(img, lt, rb, (0, 255, 0), 2)
     return img
+
 
 def draw_bbox_angle(img, bbox):
     img = np.copy(img)
@@ -34,7 +37,8 @@ def draw_bbox_angle(img, bbox):
     lb = np.array([x - h_w, y + h_h, 1])
     rt = np.array([x + h_w, y - h_h, 1])
     rb = np.array([x + h_w, y + h_h, 1])
-    rotation_matrix = cv.getRotationMatrix2D((x,y), -1*np.rad2deg(angle)+90, 1)
+    rotation_matrix = cv.getRotationMatrix2D(
+        (x, y), -1*np.rad2deg(angle)+90, 1)
     lt = np.matmul(rotation_matrix, lt.reshape((3, 1))).reshape(2)
     lb = np.matmul(rotation_matrix, lb.reshape((3, 1))).reshape(2)
     rt = np.matmul(rotation_matrix, rt.reshape((3, 1))).reshape(2)
@@ -50,6 +54,7 @@ def draw_bbox_angle(img, bbox):
     cv.line(img, rb, lb, (0, 255, 0), 2)
     return img
 
+
 def draw_seg(img, seg):
     lb = (int(seg[0][0]), int(seg[0][1]))
     lt = (int(seg[1][0]), int(seg[1][1]))
@@ -62,6 +67,7 @@ def draw_seg(img, seg):
     cv.line(img, rb, lb, (0, 255, 0), 2)
     return img
 
+
 def draw_parallelogram(img, parallelogram):
     width = parallelogram[2]
     height = parallelogram[3]
@@ -70,7 +76,7 @@ def draw_parallelogram(img, parallelogram):
     rt = (int(lt[0]+width), int(lt[1]))
     b_left = lt[1] - slope*lt[0]
     lb_y = lt[1]+height
-    lb = (int((lb_y-b_left)/slope) ,int(lb_y))
+    lb = (int((lb_y-b_left)/slope), int(lb_y))
     rb = (int(lb[0]+width), lb[1])
     img = np.copy(img)
     cv.line(img, lb, lt, (0, 255, 0), 2)
@@ -78,6 +84,7 @@ def draw_parallelogram(img, parallelogram):
     cv.line(img, rt, rb, (0, 255, 0), 2)
     cv.line(img, rb, lb, (0, 255, 0), 2)
     return img
+
 
 def draw_parallelogram_p(img, parallelogram_p):
     lb = (int(parallelogram_p[0][0]), int(parallelogram_p[0][1]))
@@ -91,8 +98,9 @@ def draw_parallelogram_p(img, parallelogram_p):
     cv.line(img, rb, lb, (0, 255, 0), 2)
     return img
 
+
 def tuple_int(point):
     tmp = tuple()
     for i in point:
         tmp = tmp + (int(i),)
-    return tmp     
+    return tmp
